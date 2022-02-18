@@ -34,6 +34,31 @@ namespace CLOG
 		};
 	}
 
+	namespace Settings
+	{
+		typedef int LoggerOptions;
+		enum LoggerOptions_
+		{
+			LoggerOptions_Default = 0,
+			LoggerOptions_NoTimestamps = (1 << 0),
+			LoggerOptions_NoColor = (1 << 1),
+			LoggerOptions_NoDate = (1 << 2),
+		};
+
+
+		struct CurrentOptions
+		{
+			Colors::Color PrimaryColor;
+			Colors::Color WarnColor = Colors::Color(231, 231, 31);
+			Colors::Color ErrorColor = Colors::Color(231, 31, 31);
+			bool Timestamps = true;
+			bool UseDate = true;
+			bool DrawColor = true;
+			bool Initialized = false;
+		}Options;
+	}
+
+
 	class _Colors
 	{
 	public:
@@ -54,32 +79,18 @@ namespace CLOG
 
 		static std::string ColoredString(std::string Input, const CLOG::Colors::Color& OutputColor)
 		{
-			std::string Output = ColorToString(OutputColor) + Input + Reset();
-			return Output;
+			if (Settings::Options.DrawColor)
+			{
+				std::string Output = ColorToString(OutputColor) + Input + Reset();
+				return Output;
+			}
+			return Input;
 		}
 	};
 
 
 
-	namespace Settings
-	{
-		enum LoggerOptions_
-		{
-			LoggerOptions_Default = 0,
-			LoggerOptions_NoTimestamps = (1 << 0),
-			LoggerOptions_NoColor = (1 << 1),
-		};
-
-
-		struct CurrentOptions
-		{
-			Colors::Color PrimaryColor;
-			Colors::Color WarnColor = Colors::Color(231, 231, 31);
-			Colors::Color ErrorColor = Colors::Color(231, 31, 31);
-			bool Timestamps = true;
-			bool DrawColor = true;
-		}Options;
-	}
+	
 
 	namespace Logger
 	{
@@ -95,7 +106,7 @@ namespace CLOG
 	namespace Logger
 	{
 
-		std::string GetTimeStamp()
+		std::string GetTimeStamp(Colors::Color TimeColor)
 		{
 			if (Settings::Options.Timestamps) 
 			{
@@ -103,16 +114,23 @@ namespace CLOG
 				time_t Time = time(0);
 				struct tm LocalTime;
 				localtime_s(&LocalTime, &Time);
-				snprintf(TimeBuffer, 255, "%02d|%02d|%02d %02d:%02d:%02d", LocalTime.tm_mon + 1, LocalTime.tm_mday, LocalTime.tm_year % 100, LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
+				if (Settings::Options.UseDate) 
+				{
+					snprintf(TimeBuffer, 255, "%02d-%02d-%02d %02d:%02d:%02d", LocalTime.tm_mon + 1, LocalTime.tm_mday, LocalTime.tm_year % 100, LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
+				}
+				else
+				{
+					snprintf(TimeBuffer, 255, "%02d:%02d:%02d", LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
+				}
 				std::string Timestamp = std::string(TimeBuffer);
 
-				return _Colors::ColoredString("[" + Timestamp + "] ", { Settings::Options.PrimaryColor });
+				return _Colors::ColoredString("[" + Timestamp + "] ", { TimeColor });
 			}
 			return "";
 		
 		}
-		// Do this
-		void UpdateColor(LogType_ Type, Colors::Color& Color)
+
+		void UpdateColor(LogType_ Type, const Colors::Color& Color)
 		{
 			switch (Type)
 			{
@@ -127,32 +145,56 @@ namespace CLOG
 				break;
 			}
 		}
-
-		void Initialize(const Colors::Color& LogColor, Settings::LoggerOptions_ Options = Settings::LoggerOptions_Default)
+		
+		void Initialize(const Colors::Color& LogColor, Settings::LoggerOptions Options = Settings::LoggerOptions_Default)
 		{
-			Settings::Options.PrimaryColor = LogColor;
+			if (!Settings::Options.Initialized) {
+				Settings::Options.PrimaryColor = LogColor;
 #ifdef _WIN32
-			system("cls"); // WINDOWS CMD HAS TO CLEAR CONSOLE FOR ANSI
+				system("cls"); // WINDOWS CMD HAS TO CLEAR CONSOLE FOR ANSI
 #endif
-			
+				Settings::Options.Timestamps = !(Options & Settings::LoggerOptions_NoTimestamps);
+				Settings::Options.DrawColor = !(Options & Settings::LoggerOptions_NoColor);
+				Settings::Options.UseDate = !(Options & Settings::LoggerOptions_NoDate);
+				Settings::Options.Initialized = true;
+			}
 		}
 
 		void Log(LogType_ Type, std::string Message)
 		{
-			std::osyncstream safecout(std::cout); // Threadsafe
-			switch (Type) 
+			if (Settings::Options.Initialized) 
 			{
-			case LogType_INFO:
+				std::osyncstream safecout(std::cout);
+				switch (Type)
+				{
+				case LogType_INFO:
 
-				safecout << GetTimeStamp() << _Colors::ColoredString(Message, Settings::Options.PrimaryColor);
-				break;
-			case LogType_WARN:
-				break;
-			case LogType_ERROR:
-				break;
+					safecout << GetTimeStamp(Settings::Options.PrimaryColor)<< _Colors::ColoredString("[INFO] ", Settings::Options.PrimaryColor)  << _Colors::ColoredString(Message, Settings::Options.PrimaryColor) << std::endl;
+					break;
+				case LogType_WARN:
+					safecout << GetTimeStamp(Settings::Options.WarnColor)<< _Colors::ColoredString("[WARN] ", Settings::Options.WarnColor)  << _Colors::ColoredString(Message, Settings::Options.WarnColor) << std::endl;
+					break;
+				case LogType_ERROR:
+					safecout << GetTimeStamp(Settings::Options.ErrorColor) << _Colors::ColoredString("[ERROR] ", Settings::Options.ErrorColor) <<  _Colors::ColoredString(Message, Settings::Options.ErrorColor) << std::endl;
+					break;
+				}
 			}
 		}
 
+		void Info(std::string Message)
+		{
+			return Log(LogType_INFO, Message);
+		}
+
+		void Warn(std::string Message)
+		{
+			return Log(LogType_WARN, Message);
+		}
+
+		void Error(std::string Message)
+		{
+			return Log(LogType_ERROR, Message);
+		}
 
 	}
 
