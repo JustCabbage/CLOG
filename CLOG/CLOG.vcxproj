@@ -144,7 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Logger\logger.hpp" />
+    <ClInclude Include="include\Logger\logger.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tests.cpp" />
