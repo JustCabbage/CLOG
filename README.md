@@ -8,6 +8,7 @@ CLOG is a relatively basic logging implementation for debugging in applications.
 - Customizable Logging options
 - Timestamp Logging
 - Date Logging
+- Thread Safe
 
 # Options
 - Default - Everything Enabled
