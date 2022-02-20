@@ -59,3 +59,8 @@ CLOG::Logger::UpdateColor(CLOG::Logger::LogType_INFO,CLOG::Colors::Color(255,0,0
 CLOG::Logger::Info("Red");
 ```
 
+# To Do
+
+- Add Log Levels
+- Add More Log Types
+- Add Ability To Update Logger Options
