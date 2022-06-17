@@ -169,13 +169,13 @@ namespace CLOG
 				{
 				case LogType_INFO:
 
-					safecout << GetTimeStamp(Settings::Options.PrimaryColor)<< _Colors::ColoredString("[INFO] ", Settings::Options.PrimaryColor)  << _Colors::ColoredString(Message, Settings::Options.PrimaryColor) << std::endl;
+					safecout << GetTimeStamp(Settings::Options.PrimaryColor)<< _Colors::ColoredString("[INFO] ", Settings::Options.PrimaryColor)  << _Colors::ColoredString(Message, Settings::Options.PrimaryColor) << "\n";
 					break;
 				case LogType_WARN:
-					safecout << GetTimeStamp(Settings::Options.WarnColor)<< _Colors::ColoredString("[WARN] ", Settings::Options.WarnColor)  << _Colors::ColoredString(Message, Settings::Options.WarnColor) << std::endl;
+					safecout << GetTimeStamp(Settings::Options.WarnColor)<< _Colors::ColoredString("[WARN] ", Settings::Options.WarnColor)  << _Colors::ColoredString(Message, Settings::Options.WarnColor) << "\n";
 					break;
 				case LogType_ERROR:
-					safecout << GetTimeStamp(Settings::Options.ErrorColor) << _Colors::ColoredString("[ERROR] ", Settings::Options.ErrorColor) <<  _Colors::ColoredString(Message, Settings::Options.ErrorColor) << std::endl;
+					safecout << GetTimeStamp(Settings::Options.ErrorColor) << _Colors::ColoredString("[ERROR] ", Settings::Options.ErrorColor) <<  _Colors::ColoredString(Message, Settings::Options.ErrorColor) << "\n";
 					break;
 				}
 			}
