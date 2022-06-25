@@ -45,7 +45,6 @@ namespace CLOG
 			LoggerOptions_NoDate = (1 << 2),
 		};
 
-
 		struct CurrentOptions
 		{
 			Colors::Color PrimaryColor;
@@ -58,26 +57,25 @@ namespace CLOG
 		}Options;
 	}
 
-
 	class _Colors
 	{
 	public:
-		static std::string ColorToString(const CLOG::Colors::Color& Input)
+		static inline std::string ColorToString(const CLOG::Colors::Color& Input)
 		{
 			return ColorToString(Input.R, Input.G, Input.B);
 		}
 
-		static std::string ColorToString(unsigned int R, unsigned int G, unsigned int B)
+		static inline std::string ColorToString(unsigned int R, unsigned int G, unsigned int B)
 		{
 			return "\033[38;2;" + std::to_string(R) + ";" + std::to_string(G) + ";" + std::to_string(B) + "m";
 		}
 
-		static std::string Reset()
+		static inline std::string Reset()
 		{
 			return "\033[0;00m";
 		}
 
-		static std::string ColoredString(std::string Input, const CLOG::Colors::Color& OutputColor)
+		static inline std::string ColoredString(const std::string& Input, const CLOG::Colors::Color& OutputColor)
 		{
 			if (Settings::Options.DrawColor)
 			{
@@ -87,10 +85,6 @@ namespace CLOG
 			return Input;
 		}
 	};
-
-
-
-	
 
 	namespace Logger
 	{
@@ -102,11 +96,10 @@ namespace CLOG
 		};
 	}
 
-
 	namespace Logger
 	{
 
-		std::string GetTimeStamp(Colors::Color TimeColor)
+		inline std::string GetTimeStamp(const Colors::Color& TimeColor)
 		{
 			if (Settings::Options.Timestamps) 
 			{
@@ -123,14 +116,13 @@ namespace CLOG
 					snprintf(TimeBuffer, 255, "%02d:%02d:%02d", LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
 				}
 				std::string Timestamp = std::string(TimeBuffer);
-
 				return _Colors::ColoredString("[" + Timestamp + "] ", { TimeColor });
 			}
 			return "";
 		
 		}
 
-		void UpdateColor(LogType_ Type, const Colors::Color& Color)
+		inline void UpdateColor(LogType_ Type, const Colors::Color& Color)
 		{
 			switch (Type)
 			{
@@ -146,7 +138,7 @@ namespace CLOG
 			}
 		}
 		
-		void Initialize(const Colors::Color& LogColor, Settings::LoggerOptions Options = Settings::LoggerOptions_Default)
+		inline void Initialize(const Colors::Color& LogColor, Settings::LoggerOptions Options = Settings::LoggerOptions_Default)
 		{
 			if (!Settings::Options.Initialized) {
 				Settings::Options.PrimaryColor = LogColor;
@@ -160,7 +152,7 @@ namespace CLOG
 			}
 		}
 
-		void Log(LogType_ Type, std::string Message)
+		inline void Log(LogType_ Type, const std::string& Message)
 		{
 			if (Settings::Options.Initialized) 
 			{
@@ -181,24 +173,19 @@ namespace CLOG
 			}
 		}
 
-		void Info(std::string Message)
+		inline void Info(const std::string& Message)
 		{
 			return Log(LogType_INFO, Message);
 		}
 
-		void Warn(std::string Message)
+		inline void Warn(const std::string& Message)
 		{
 			return Log(LogType_WARN, Message);
 		}
 
-		void Error(std::string Message)
+		inline void Error(const std::string& Message)
 		{
 			return Log(LogType_ERROR, Message);
 		}
-
 	}
-
-
-	
-
 }
