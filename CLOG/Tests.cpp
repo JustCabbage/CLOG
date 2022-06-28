@@ -1,6 +1,5 @@
 #include "include/Logger/logger.hpp"
 
-
 int main()
 {
 	CLOG::Logger::Initialize(CLOG::Colors::Color(231, 31, 231), CLOG::Settings::LoggerOptions_NoDate);
@@ -9,7 +8,7 @@ int main()
 	CLOG::Logger::Warn("This is a Warning!");
 	CLOG::Logger::Error("This is an Error!");
 
-	CLOG::Logger::UpdateColor(CLOG::Logger::LogType_WARN,CLOG::Colors::Color(255, 215, 0));
+	CLOG::Logger::UpdateColor(CLOG::Logger::LogType_WARN, CLOG::Colors::Color(255, 215, 0));
 
 	CLOG::Logger::Warn("This is a Warning!");
 

@@ -1,15 +1,15 @@
 // Copyright(c) 2022 Cabbage
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this softwareand associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and /or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-// 
+//
 // The above copyright noticeand this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -57,7 +57,7 @@ namespace CLOG
 		}Options;
 	}
 
-	class _Colors
+	class ColorUtils
 	{
 	public:
 		static inline std::string ColorToString(const CLOG::Colors::Color& Input)
@@ -67,7 +67,7 @@ namespace CLOG
 
 		static inline std::string ColorToString(unsigned int R, unsigned int G, unsigned int B)
 		{
-			return "\033[38;2;" + std::to_string(R) + ";" + std::to_string(G) + ";" + std::to_string(B) + "m";
+			return std::format("\033[38;2;{};{};{}m", R, G, B);
 		}
 
 		static inline std::string Reset()
@@ -98,28 +98,25 @@ namespace CLOG
 
 	namespace Logger
 	{
-
 		inline std::string GetTimeStamp(const Colors::Color& TimeColor)
 		{
-			if (Settings::Options.Timestamps) 
+			if (Settings::Options.Timestamps)
 			{
-				char TimeBuffer[255] = {};
+				std::string Timestamp;
 				time_t Time = time(0);
 				struct tm LocalTime;
 				localtime_s(&LocalTime, &Time);
-				if (Settings::Options.UseDate) 
+				if (Settings::Options.UseDate)
 				{
-					snprintf(TimeBuffer, 255, "%02d-%02d-%02d %02d:%02d:%02d", LocalTime.tm_mon + 1, LocalTime.tm_mday, LocalTime.tm_year % 100, LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
+					Timestamp = std::format("{:02}-{:02}-{:02} {:02}:{:02}:{:02}", LocalTime.tm_mon + 1, LocalTime.tm_mday, LocalTime.tm_year % 100, LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
 				}
 				else
 				{
-					snprintf(TimeBuffer, 255, "%02d:%02d:%02d", LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
+					Timestamp = std::format("{:02}:{:02}:{:02}", LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
 				}
-				std::string Timestamp = std::string(TimeBuffer);
-				return _Colors::ColoredString("[" + Timestamp + "] ", { TimeColor });
+				return ColorUtils::ColoredString(std::format("[{}] ", Timestamp), TimeColor);
 			}
 			return "";
-		
 		}
 
 		inline void UpdateColor(LogType_ Type, const Colors::Color& Color)
@@ -137,7 +134,7 @@ namespace CLOG
 				break;
 			}
 		}
-		
+
 		inline void Initialize(const Colors::Color& LogColor, Settings::LoggerOptions Options = Settings::LoggerOptions_Default)
 		{
 			if (!Settings::Options.Initialized) {
@@ -154,20 +151,20 @@ namespace CLOG
 
 		inline void Log(LogType_ Type, const std::string& Message)
 		{
-			if (Settings::Options.Initialized) 
+			if (Settings::Options.Initialized)
 			{
 				std::osyncstream safecout(std::cout);
 				switch (Type)
 				{
 				case LogType_INFO:
 
-					safecout << GetTimeStamp(Settings::Options.PrimaryColor)<< _Colors::ColoredString("[INFO] ", Settings::Options.PrimaryColor)  << _Colors::ColoredString(Message, Settings::Options.PrimaryColor) << "\n";
+					safecout << GetTimeStamp(Settings::Options.PrimaryColor) << ColorUtils::ColoredString("[INFO] ", Settings::Options.PrimaryColor) << ColorUtils::ColoredString(Message, Settings::Options.PrimaryColor) << "\n";
 					break;
 				case LogType_WARN:
-					safecout << GetTimeStamp(Settings::Options.WarnColor)<< _Colors::ColoredString("[WARN] ", Settings::Options.WarnColor)  << _Colors::ColoredString(Message, Settings::Options.WarnColor) << "\n";
+					safecout << GetTimeStamp(Settings::Options.WarnColor) << ColorUtils::ColoredString("[WARN] ", Settings::Options.WarnColor) << ColorUtils::ColoredString(Message, Settings::Options.WarnColor) << "\n";
 					break;
 				case LogType_ERROR:
-					safecout << GetTimeStamp(Settings::Options.ErrorColor) << _Colors::ColoredString("[ERROR] ", Settings::Options.ErrorColor) <<  _Colors::ColoredString(Message, Settings::Options.ErrorColor) << "\n";
+					safecout << GetTimeStamp(Settings::Options.ErrorColor) << ColorUtils::ColoredString("[ERROR] ", Settings::Options.ErrorColor) << ColorUtils::ColoredString(Message, Settings::Options.ErrorColor) << "\n";
 					break;
 				}
 			}
