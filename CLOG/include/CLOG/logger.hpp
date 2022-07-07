@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #pragma once
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <string>
 #include <syncstream>
@@ -26,11 +27,11 @@ namespace CLOG
 {
 	namespace Colors
 	{
-		inline struct Color
+		struct Color
 		{
 			const Color() : R(255), G(255), B(255) {}
-			const Color(int r, int g, int b) : R(r), G(g), B(b) {}
-			int R, G, B = 0;
+			const Color(const std::uint32_t r, const std::uint32_t g, const std::uint32_t b) : R(r), G(g), B(b) {}
+			std::uint32_t R, G, B = 0;
 		};
 	}
 
@@ -65,9 +66,9 @@ namespace CLOG
 			return ColorToString(Input.R, Input.G, Input.B);
 		}
 
-		static inline std::string ColorToString(unsigned int R, unsigned int G, unsigned int B)
+		static inline std::string ColorToString(std::uint32_t R, std::uint32_t G, std::uint32_t B)
 		{
-			return std::format("\033[38;2;{};{};{}m", R, G, B);
+			return "\033[38;2;" + std::to_string(R) + ";" + std::to_string(G) + ";" + std::to_string(B) + "m";
 		}
 
 		static inline std::string Reset()
@@ -88,7 +89,7 @@ namespace CLOG
 
 	namespace Logger
 	{
-		enum LogType_ : int
+		enum LogType_ : std::uint32_t
 		{
 			LogType_INFO = 0,
 			LogType_WARN,
@@ -102,19 +103,19 @@ namespace CLOG
 		{
 			if (Settings::Options.Timestamps)
 			{
-				std::string Timestamp;
+				char TimeBuffer[255] = {};
 				time_t Time = time(0);
-				struct tm LocalTime;
-				localtime_s(&LocalTime, &Time);
+				struct tm LocalTime = *localtime(&Time);
 				if (Settings::Options.UseDate)
 				{
-					Timestamp = std::format("{:02}-{:02}-{:02} {:02}:{:02}:{:02}", LocalTime.tm_mon + 1, LocalTime.tm_mday, LocalTime.tm_year % 100, LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
+					snprintf(TimeBuffer, 255, "%02d-%02d-%02d %02d:%02d:%02d", LocalTime.tm_mon + 1, LocalTime.tm_mday, LocalTime.tm_year % 100, LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
 				}
 				else
 				{
-					Timestamp = std::format("{:02}:{:02}:{:02}", LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
+					snprintf(TimeBuffer, 255, "%02d:%02d:%02d", LocalTime.tm_hour, LocalTime.tm_min, LocalTime.tm_sec);
 				}
-				return ColorUtils::ColoredString(std::format("[{}] ", Timestamp), TimeColor);
+				std::string Timestamp = std::string(TimeBuffer);
+				return ColorUtils::ColoredString("[" + Timestamp  + "]", TimeColor);
 			}
 			return "";
 		}
@@ -137,7 +138,8 @@ namespace CLOG
 
 		inline void Initialize(const Colors::Color& LogColor, Settings::LoggerOptions Options = Settings::LoggerOptions_Default)
 		{
-			if (!Settings::Options.Initialized) {
+			if (!Settings::Options.Initialized) 
+			{
 				Settings::Options.PrimaryColor = LogColor;
 #ifdef _WIN32
 				system("cls"); // WINDOWS CMD HAS TO CLEAR CONSOLE FOR ANSI
@@ -157,7 +159,6 @@ namespace CLOG
 				switch (Type)
 				{
 				case LogType_INFO:
-
 					safecout << GetTimeStamp(Settings::Options.PrimaryColor) << ColorUtils::ColoredString("[INFO] ", Settings::Options.PrimaryColor) << ColorUtils::ColoredString(Message, Settings::Options.PrimaryColor) << "\n";
 					break;
 				case LogType_WARN:
