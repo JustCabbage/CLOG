@@ -26,7 +26,7 @@ namespace CLOG
 {
 	namespace Colors
 	{
-		struct Color
+		inline struct Color
 		{
 			const Color() : R(255), G(255), B(255) {}
 			const Color(int r, int g, int b) : R(r), G(g), B(b) {}
@@ -45,7 +45,7 @@ namespace CLOG
 			LoggerOptions_NoDate = (1 << 2),
 		};
 
-		struct CurrentOptions
+		inline struct CurrentOptions
 		{
 			Colors::Color PrimaryColor;
 			Colors::Color WarnColor = Colors::Color(231, 231, 31);
