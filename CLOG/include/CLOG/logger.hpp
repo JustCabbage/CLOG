@@ -29,8 +29,8 @@ namespace CLOG
 	{
 		struct Color
 		{
-			const Color() : R(255), G(255), B(255) {}
-			const Color(const std::uint32_t r, const std::uint32_t g, const std::uint32_t b) : R(r), G(g), B(b) {}
+			Color() : R(255), G(255), B(255) {}
+			Color(const std::uint32_t r, const std::uint32_t g, const std::uint32_t b) : R(r), G(g), B(b) {}
 			std::uint32_t R, G, B = 0;
 		};
 	}
