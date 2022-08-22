@@ -141,9 +141,9 @@ namespace CLOG
 			if (!Settings::Options.Initialized) 
 			{
 				Settings::Options.PrimaryColor = LogColor;
-#ifdef _WIN32
+				#ifdef _WIN32
 				system("cls"); // WINDOWS CMD HAS TO CLEAR CONSOLE FOR ANSI
-#endif
+				#endif
 				Settings::Options.Timestamps = !(Options & Settings::LoggerOptions_NoTimestamps);
 				Settings::Options.DrawColor = !(Options & Settings::LoggerOptions_NoColor);
 				Settings::Options.UseDate = !(Options & Settings::LoggerOptions_NoDate);
